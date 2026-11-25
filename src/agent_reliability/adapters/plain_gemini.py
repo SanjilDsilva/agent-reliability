@@ -34,22 +34,20 @@ class PlainGeminiAdapter:
     ):
         self.model_name = model_name
         self.max_steps = max_steps
+        self.client = client
 
-        if client is not None:
-            self.client = client
-        else:
+    def run(self, prompt: str, tools: ToolGateway) -> str:
+        if self.client is None:
             api_key = os.getenv("GEMINI_API_KEY")
             if not api_key:
                 raise ValueError(
                     "GEMINI_API_KEY not found. Please set GEMINI_API_KEY in your private .env file."
                 )
-            # Google's official OpenAI-compatible endpoint
             self.client = OpenAI(
                 api_key=api_key,
                 base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
             )
 
-    def run(self, prompt: str, tools: ToolGateway) -> str:
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},

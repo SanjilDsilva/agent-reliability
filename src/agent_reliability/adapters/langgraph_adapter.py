@@ -32,11 +32,12 @@ class LangGraphAdapter:
         model_name: str = "gemini-3.1-flash-lite",
     ):
         self.model_name = model_name
-        self.api_key = os.getenv("GEMINI_API_KEY")
-        if not self.api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment or .env file.")
 
     def run(self, prompt: str, tools: ToolGateway) -> str:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY not found in environment or .env file.")
+
         # Wrap our gateway tools so LangGraph can manage them
         @tool
         def get_order(order_id: str) -> dict:
@@ -49,7 +50,7 @@ class LangGraphAdapter:
         @tool
         def get_return_status(order_id: str) -> dict:
             """Check if returned items for an order have been recieved and passed warehouse inspection."""
-            res = tools.call("get_returned_status", order_id=order_id)
+            res = tools.call("get_return_status", order_id=order_id)
             return res if res is not None else {"error": "Return status not found"}
 
         @tool
@@ -71,7 +72,7 @@ class LangGraphAdapter:
         # Initialize the model and bind the tools
         llm = ChatGoogleGenerativeAI(
             model=self.model_name,
-            google_api_key=self.api_key,
+            google_api_key=api_key,
             temperature=0.0,
         )
         llm_with_tools = llm.bind_tools(tool_list)
