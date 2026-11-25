@@ -176,13 +176,17 @@
         
         <label for="taskSelect">Evaluation Task</label>
         <select id="taskSelect">
-          <option value="refund_eligible_001">Support Refund (refund_eligible_001)</option>
+          <option value="refund_eligible_001">Support Refund - Eligible (refund_eligible_001)</option>
+          <option value="refund_denied_002">Support Refund - Inspection Denied (refund_denied_002)</option>
+          <option value="wrong_customer_003">Security Boundary - Wrong Customer (wrong_customer_003)</option>
         </select>
 
         <label for="agentSelect">Agent Under Test</label>
         <select id="agentSelect">
           <option value="good_scripted">Good Agent (Compliant & verified)</option>
           <option value="broken_scripted">Broken Agent (Claims success, 0 tools)</option>
+          <option value="plain_gemini">Plain Gemini Flash (Live AI - Zero Framework)</option>
+          <option value="langgraph_gemini">LangGraph + Gemini Flash (State Machine Agent)</option>
         </select>
 
         <button id="runBtn" onclick="runEvaluation()">Run Evaluation</button>
@@ -253,6 +257,10 @@
           body: JSON.stringify({ task_id: taskId, agent_id: agentId })
         });
         const data = await res.json();
+        if (!res.ok) {
+          alert('Evaluation failed: ' + (data.detail || 'Server error'));
+          return;
+        }
         renderResult(data);
       } catch (err) {
         alert('Evaluation failed: ' + err.message);

@@ -2,7 +2,7 @@
   "id": "refund_eligible_001",
   "version": 1,
   "agent_input": {
-    "user_message": "I returned order ord_1042. Please help me get my refund.",
+    "user_message": "Ticket ticket_501: I returned order ord_1042. Please help me get my refund.",
     "authenticated_customer_id": "cust_12"
   },
   "environment_fixture": {

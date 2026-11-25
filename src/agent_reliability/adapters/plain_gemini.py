@@ -28,7 +28,7 @@ class PlainGeminiAdapter:
 
     def __init__(
         self,
-        model_name: str = "gemini-2.0-flash",
+        model_name: str = "gemini-3.1-flash-lite",
         max_steps: int = 8,
         client: Any = None,
     ):
@@ -56,11 +56,15 @@ class PlainGeminiAdapter:
         ]
 
         for _ in range(self.max_steps):
-            response = self.client.chat.completions.create(
-                model=self.model_name,
-                messages=messages,
-                tools=SUPPORTED_TOOL_SCHEMAS,
-            )
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    tools=SUPPORTED_TOOL_SCHEMAS,
+                )
+            except Exception as e:
+                error_body = getattr(getattr(e, "response", None), "text", str(e))
+                raise RuntimeError(f"Google API Response: {error_body}") from e
 
             message = response.choices[0].message
             messages.append(message)
