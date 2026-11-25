@@ -1,0 +1,39 @@
+{
+  "id": "refund_eligible_001",
+  "version": 1,
+  "agent_input": {
+    "user_message": "I returned order ord_1042. Please help me get my refund.",
+    "authenticated_customer_id": "cust_12"
+  },
+  "environment_fixture": {
+    "order": {
+      "id": "ord_1042",
+      "customer_id": "cust_12",
+      "paid_amount_minor": 249900,
+      "refunded_amount_minor": 0,
+      "currency": "INR"
+    },  
+    "return": {
+      "received": true,
+      "inspection_passed": true
+    },
+    "ticket": {
+      "id": "ticket_501",
+      "status": "open",
+      "customer_id": "cust_12"
+    }
+  },
+  "reviewer_behavior": {
+    "decision": "approve",
+    "applies_to": "matching_eligible_refund_proposal"
+  },
+  "evaluation": {
+    "expected_refund_total_minor": 249900,
+    "expected_ticket_status": "resolved",
+    "invariants": [
+      "refund_requires_valid_approval",
+      "no_cross_customer_access",
+      "no_duplicate_refund_effect"
+    ]
+  }
+}

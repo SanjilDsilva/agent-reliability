@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentReliability | AI Evaluation Platform</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #151d30;
+      --border: #232f4b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success-bg: #064e3b;
+      --success-text: #34d399;
+      --fail-bg: #7f1d1d;
+      --fail-text: #f87171;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+    }
+    header h1 { font-size: 1.85rem; font-weight: 700; color: #fff; }
+    header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media (min-width: 768px) {
+      .grid-2 { grid-template-columns: 360px 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    label { display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem; }
+    select, input {
+      width: 100%;
+      background: #0d1322;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      outline: none;
+    }
+    select:focus, input:focus { border-color: var(--accent); }
+
+    button {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+    /* Results section */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass { background: var(--success-bg); color: var(--success-text); }
+    .badge-fail { background: var(--fail-bg); color: var(--fail-text); }
+
+    .result-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-box {
+      background: #0d1322;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .stat-value { font-size: 1rem; font-weight: 500; margin-top: 0.2rem; }
+
+    /* Trace timeline */
+    .timeline { list-style: none; position: relative; padding-left: 1.5rem; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-item { position: relative; margin-bottom: 1rem; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      top: 0.35rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--card-bg);
+    }
+    .tool-box {
+      background: #0d1322;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+    .tool-name { font-weight: 600; color: #60a5fa; font-family: monospace; font-size: 0.9rem; }
+    .tool-args { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; word-break: break-all; }
+
+    .empty-trace {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px dashed var(--fail-text);
+      color: #fca5a5;
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .placeholder { color: var(--text-muted); text-align: center; padding: 3rem 1rem; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AgentReliability</h1>
+      <p>Deterministic AI Agent Evaluation & Tool Trace Verification</p>
+    </header>
+
+    <div class="grid grid-2">
+      <!-- Left: Controls -->
+      <div class="card">
+        <h2 class="card-title">Run Scenario</h2>
+        
+        <label for="taskSelect">Evaluation Task</label>
+        <select id="taskSelect">
+          <option value="refund_eligible_001">Support Refund (refund_eligible_001)</option>
+        </select>
+
+        <label for="agentSelect">Agent Under Test</label>
+        <select id="agentSelect">
+          <option value="good_scripted">Good Agent (Compliant & verified)</option>
+          <option value="broken_scripted">Broken Agent (Claims success, 0 tools)</option>
+        </select>
+
+        <button id="runBtn" onclick="runEvaluation()">Run Evaluation</button>
+
+        <div class="divider"></div>
+
+        <h2 class="card-title" style="font-size: 0.95rem;">Lookup Previous Attempt</h2>
+        <label for="attemptIdInput">Attempt ID</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="number" id="attemptIdInput" placeholder="e.g. 5" style="margin-bottom: 0;">
+          <button style="width: auto; padding: 0.65rem 1rem;" onclick="lookupAttempt()">Fetch</button>
+        </div>
+      </div>
+
+      <!-- Right: Results Panel -->
+      <div class="card" id="resultsCard">
+        <div class="placeholder" id="placeholder">
+          Select an agent and click <strong>Run Evaluation</strong> to see the trace and outcome.
+        </div>
+
+        <div id="resultsContent" style="display: none;">
+          <div class="result-banner">
+            <div>
+              <span id="passBadge" class="badge"></span>
+              <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;" id="attemptIdText"></span>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted);" id="taskIdText"></span>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-label">Agent Response (What the agent claimed)</div>
+            <div class="stat-value" id="agentResponse"></div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="stat-box">
+              <div class="stat-label">Refund Verified</div>
+              <div class="stat-value" id="refundStatus"></div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Ticket Status</div>
+              <div class="stat-value" id="ticketStatus"></div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: #fff;">Tool Trace (Security Camera)</h3>
+            <div id="traceContainer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function runEvaluation() {
+      const runBtn = document.getElementById('runBtn');
+      const taskId = document.getElementById('taskSelect').value;
+      const agentId = document.getElementById('agentSelect').value;
+
+      runBtn.disabled = true;
+      runBtn.innerText = 'Evaluating...';
+
+      try {
+        const res = await fetch('/evaluations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task_id: taskId, agent_id: agentId })
+        });
+        const data = await res.json();
+        renderResult(data);
+      } catch (err) {
+        alert('Evaluation failed: ' + err.message);
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerText = 'Run Evaluation';
+      }
+    }
+
+    async function lookupAttempt() {
+      const id = document.getElementById('attemptIdInput').value;
+      if (!id) return alert('Please enter an Attempt ID');
+
+      try {
+        const res = await fetch(`/evaluations/${id}`);
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.detail || 'Attempt not found');
+          return;
+        }
+        const data = await res.json();
+        renderResult(data);
+      } catch (err) {
+        alert('Lookup failed: ' + err.message);
+      }
+    }
+
+    function renderResult(data) {
+      document.getElementById('placeholder').style.display = 'none';
+      document.getElementById('resultsContent').style.display = 'block';
+
+      const passed = data.evaluation_result.passed;
+      const badge = document.getElementById('passBadge');
+      badge.className = 'badge ' + (passed ? 'badge-pass' : 'badge-fail');
+      badge.innerText = passed ? 'PASSED' : 'FAILED';
+
+      document.getElementById('attemptIdText').innerText = `Attempt #${data.attempt_id}`;
+      document.getElementById('taskIdText').innerText = data.task_id;
+      document.getElementById('agentResponse').innerText = `"${data.agent_response}"`;
+
+      // Format refund amounts (minor units to major currency)
+      const expectedAmt = (data.evaluation_result.expected_amount_minor / 100).toFixed(2);
+      const actualAmt = (data.evaluation_result.actual_amount_minor / 100).toFixed(2);
+      document.getElementById('refundStatus').innerText = `${actualAmt} / ${expectedAmt} INR`;
+
+      document.getElementById('ticketStatus').innerText = 
+        `${data.evaluation_result.actual_ticket_status} (expected: ${data.evaluation_result.expected_ticket_status})`;
+
+      // Render tool trace
+      const traceContainer = document.getElementById('traceContainer');
+      traceContainer.innerHTML = '';
+
+      if (!data.trace_events || data.trace_events.length === 0) {
+        traceContainer.innerHTML = `
+          <div class="empty-trace">
+            <strong>⚠️ Zero Tool Calls Recorded!</strong><br>
+            The agent made a claim of success, but called 0 tools in the environment. The outcome evaluator caught the false claim.
+          </div>
+        `;
+      } else {
+        const ul = document.createElement('ul');
+        ul.className = 'timeline';
+        data.trace_events.forEach(evt => {
+          const li = document.createElement('li');
+          li.className = 'timeline-item';
+          li.innerHTML = `
+            <div class="tool-box">
+              <div class="tool-name">#${evt.sequence} ${evt.tool_name}()</div>
+              <div class="tool-args">Args: ${JSON.stringify(evt.arguments)}</div>
+              <div class="tool-args" style="color: #6ee7b7; margin-top: 0.2rem;">Result: ${JSON.stringify(evt.result)}</div>
+            </div>
+          `;
+          ul.appendChild(li);
+        });
+        traceContainer.appendChild(ul);
+      }
+    }
+  </script>
+</body>
+</html>

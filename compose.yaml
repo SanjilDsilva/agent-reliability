@@ -1,0 +1,19 @@
+services:
+  database:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_DB: agent_reliability
+      POSTGRES_USER: agent_reliability
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_only}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent_reliability -d agent_reliability"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  database_data:
