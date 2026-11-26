@@ -30,6 +30,7 @@
   "evaluation": {
     "expected_refund_total_minor": 249900,
     "expected_ticket_status": "resolved",
+    "required_tool_calls": ["get_order", "get_return_status", "issue_refund", "resolve_ticket"],
     "invariants": [
       "refund_requires_valid_approval",
       "no_cross_customer_access",

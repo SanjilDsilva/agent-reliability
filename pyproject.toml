@@ -1,10 +1,10 @@
 [project]
 name = "agent-reliability"
 version = "0.1.0"
-description = "Add your description here"
+description = "A deterministic evaluation harness for AI agent reliability and invariant checking"
 readme = "README.md"
 authors = [
-    { name = "Sanjil Cleetus D'silva", email = "sanjildsilva@gmail.com" }
+    { name = "Sanjil Cleetus D'silva" }
 ]
 requires-python = ">=3.14"
 dependencies = [

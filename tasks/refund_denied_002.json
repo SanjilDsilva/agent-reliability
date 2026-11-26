@@ -30,6 +30,7 @@
   "evaluation": {
     "expected_refund_total_minor": 0,
     "expected_ticket_status": "open",
+    "required_tool_calls": ["get_return_status"],
     "invariants": [
       "refund_requires_valid_approval",
       "no_cross_customer_access",
