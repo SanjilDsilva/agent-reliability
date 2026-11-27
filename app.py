@@ -38,10 +38,9 @@ with gr.Blocks(title="AgentReliability", fill_width=True) as demo:
         f'<iframe srcdoc="{escaped_html}" style="width: 100%; height: 98vh; border: none;"></iframe>'
     )
 
-# Attach all FastAPI endpoints (/evaluations, /health, etc.)
-for route in fastapi_app.routes:
-    if getattr(route, "path", "") not in [getattr(dr, "path", "") for dr in demo.app.routes]:
-        demo.app.routes.append(route)
+# Prepend all REST API endpoints (/evaluations, /health, etc.) so they take priority
+api_routes = [r for r in fastapi_app.routes if getattr(r, "path", "") != "/"]
+demo.app.router.routes = api_routes + demo.app.router.routes
 
 app = demo.app
 
