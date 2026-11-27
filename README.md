@@ -1,3 +1,13 @@
+---
+title: AgentReliability
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+app_file: app.py
+pinned: false
+---
+
 # AgentReliability
 
 A deterministic evaluation harness for measuring whether AI customer support agents actually execute their claimed actions, rather than relying on LLM self-reporting or LLM-as-a-judge.
