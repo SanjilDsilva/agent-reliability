@@ -3,6 +3,9 @@ import os
 import sys
 from pathlib import Path
 
+# Disable Gradio SSR Node.js reverse proxy so Python serves all API routes directly
+os.environ["GRADIO_SSR_MODE"] = "False"
+
 # Add src to sys.path so agent_reliability is importable anywhere
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
@@ -45,6 +48,12 @@ demo.app.router.routes = api_routes + demo.app.router.routes
 app = demo.app
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, css=custom_css, _app=demo.app)
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        css=custom_css,
+        _app=demo.app,
+        ssr_mode=False,
+    )
 
 
