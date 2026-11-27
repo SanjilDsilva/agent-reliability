@@ -3,340 +3,762 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgentReliability | AI Evaluation Platform</title>
+  <title>AgentReliability | Deterministic AI Agent Evaluation Platform</title>
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: #151d30;
-      --border: #232f4b;
-      --text: #f1f5f9;
+      --bg: #070b14;
+      --card-bg: #0f172a;
+      --card-inner: #090e1a;
+      --border: #1e293b;
+      --border-accent: #334155;
+      --text: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
       --accent: #3b82f6;
       --accent-hover: #2563eb;
-      --success-bg: #064e3b;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --success-bg: rgba(16, 185, 129, 0.12);
+      --success-border: #059669;
       --success-text: #34d399;
-      --fail-bg: #7f1d1d;
+      --fail-bg: rgba(239, 68, 68, 0.12);
+      --fail-border: #dc2626;
       --fail-text: #f87171;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --warning-bg: rgba(245, 158, 11, 0.12);
+      --warning-text: #fbbf24;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
       font-family: var(--font);
       background-color: var(--bg);
       color: var(--text);
-      line-height: 1.5;
-      padding: 2rem 1rem;
+      line-height: 1.55;
+      padding: 1.5rem 1rem;
     }
-    .container { max-width: 1000px; margin: 0 auto; }
+
+    .app-container {
+      max-width: 1560px;
+      margin: 0 auto;
+    }
+
+    /* Header Bar */
     header {
-      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
       border-bottom: 1px solid var(--border);
       padding-bottom: 1.25rem;
     }
-    header h1 { font-size: 1.85rem; font-weight: 700; color: #fff; }
-    header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem; }
-
-    .grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
-    @media (min-width: 768px) {
-      .grid-2 { grid-template-columns: 360px 1fr; }
+    .header-title-group h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #fff;
+    }
+    .header-title-group h1 .shield-icon {
+      color: var(--accent);
+    }
+    .header-title-group p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.2rem;
+    }
+    .header-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-muted);
+    }
+    .pill.active {
+      border-color: var(--accent);
+      color: #93c5fd;
+      background: var(--accent-glow);
     }
 
+    /* 3-Column Responsive Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    @media (min-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 340px 1fr 340px;
+        align-items: start;
+      }
+    }
+
+    /* Card Panels */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
     }
     .card-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    label { display: block; font-size: 0.825rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem; }
+    /* Side Panels Content */
+    .info-section {
+      margin-bottom: 1.25rem;
+    }
+    .info-section h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .info-section p {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .pillar-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .pillar-title {
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: #60a5fa;
+      font-family: var(--font-mono);
+      margin-bottom: 0.25rem;
+    }
+    .pillar-desc {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+    }
+
+    /* Form Controls */
+    label {
+      display: block;
+      font-size: 0.775rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      margin-bottom: 0.35rem;
+    }
     select, input {
       width: 100%;
-      background: #0d1322;
+      background: var(--card-inner);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       color: #fff;
-      padding: 0.65rem 0.75rem;
-      font-size: 0.9rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.875rem;
       margin-bottom: 1rem;
       outline: none;
+      transition: border 0.15s ease;
     }
-    select:focus, input:focus { border-color: var(--accent); }
+    select:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
 
-    button {
+    button.btn-primary {
       width: 100%;
       background: var(--accent);
       color: #fff;
       border: none;
-      border-radius: 6px;
-      padding: 0.75rem 1rem;
-      font-size: 0.95rem;
-      font-weight: 600;
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.15s ease, transform 0.05s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
-    button:hover { background: var(--accent-hover); }
+    button.btn-primary:hover { background: var(--accent-hover); }
+    button.btn-primary:active { transform: scale(0.99); }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
-
-    /* Results section */
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    /* Interactive Demo Guide Buttons */
+    .demo-btn {
+      width: 100%;
+      text-align: left;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
-    .badge-pass { background: var(--success-bg); color: var(--success-text); }
-    .badge-fail { background: var(--fail-bg); color: var(--fail-text); }
+    .demo-btn:hover {
+      border-color: var(--accent);
+      background: #111a2e;
+    }
+    .demo-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      margin-bottom: 0.3rem;
+    }
+    .demo-badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .demo-badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .demo-badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .demo-name {
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+    .demo-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
 
+    /* Center Results Panel */
     .result-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      border: 1px solid transparent;
     }
-    .stat-box {
-      background: #0d1322;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.75rem;
+    .result-banner.banner-pass {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success-text);
+    }
+    .result-banner.banner-fail {
+      background: var(--fail-bg);
+      border-color: var(--fail-border);
+      color: var(--fail-text);
+    }
+    .result-banner.banner-error {
+      background: var(--warning-bg);
+      border-color: #d97706;
+      color: var(--warning-text);
+    }
+    .verdict-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .data-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
       margin-bottom: 1rem;
     }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-    .stat-value { font-size: 1rem; font-weight: 500; margin-top: 0.2rem; }
+    .stat-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+    .stat-label {
+      font-size: 0.725rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .stat-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 0.25rem;
+    }
 
     /* Trace timeline */
-    .timeline { list-style: none; position: relative; padding-left: 1.5rem; }
+    .timeline {
+      list-style: none;
+      position: relative;
+      padding-left: 1.5rem;
+      margin-top: 0.75rem;
+    }
     .timeline::before {
       content: '';
       position: absolute;
-      left: 6px;
-      top: 6px;
-      bottom: 6px;
+      left: 7px;
+      top: 10px;
+      bottom: 10px;
       width: 2px;
       background: var(--border);
     }
-    .timeline-item { position: relative; margin-bottom: 1rem; }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 0.75rem;
+    }
     .timeline-item::before {
       content: '';
       position: absolute;
       left: -1.5rem;
-      top: 0.35rem;
-      width: 10px;
-      height: 10px;
+      top: 0.5rem;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--accent);
-      border: 2px solid var(--card-bg);
+      border: 2px solid var(--bg);
     }
     .tool-box {
-      background: #0d1322;
+      background: var(--card-inner);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 0.75rem;
     }
-    .tool-name { font-weight: 600; color: #60a5fa; font-family: monospace; font-size: 0.9rem; }
-    .tool-args { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; word-break: break-all; }
+    .tool-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+    .tool-name {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #93c5fd;
+      font-size: 0.85rem;
+    }
+    .tool-seq {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+    .tool-args, .tool-res {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      background: #040812;
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.35rem;
+    }
 
     .empty-trace {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px dashed var(--fail-text);
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px dashed var(--fail-border);
       color: #fca5a5;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 1rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       text-align: center;
     }
-    .placeholder { color: var(--text-muted); text-align: center; padding: 3rem 1rem; font-size: 0.95rem; }
+
+    .placeholder {
+      color: var(--text-dim);
+      text-align: center;
+      padding: 4rem 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .footer-bar {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.775rem;
+      color: var(--text-dim);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="app-container">
+    
+    <!-- Top Nav Header -->
     <header>
-      <h1>AgentReliability</h1>
-      <p>Deterministic AI Agent Evaluation & Tool Trace Verification</p>
+      <div class="header-title-group">
+        <h1>
+          <span class="shield-icon">🛡️</span> AgentReliability
+        </h1>
+        <p>Deterministic Ground-Truth Test Harness & Execution Camera for AI Agents</p>
+      </div>
+      <div class="header-tags">
+        <span class="pill active">Zero-Framework vs LangGraph</span>
+        <span class="pill">Gemini 3.1 Flash Lite</span>
+        <span class="pill">Temp: 0.0</span>
+        <span class="pill">PostgreSQL 17</span>
+        <span class="pill">Alembic</span>
+      </div>
     </header>
 
-    <div class="grid grid-2">
-      <!-- Left: Controls -->
+    <!-- 3-Column Dashboard -->
+    <div class="dashboard-grid">
+
+      <!-- LEFT COLUMN: How It Works & Architecture -->
       <div class="card">
-        <h2 class="card-title">Run Scenario</h2>
-        
-        <label for="taskSelect">Evaluation Task</label>
-        <select id="taskSelect">
-          <option value="refund_eligible_001">Support Refund - Eligible (refund_eligible_001)</option>
-          <option value="refund_denied_002">Support Refund - Inspection Denied (refund_denied_002)</option>
-          <option value="wrong_customer_003">Security Boundary - Wrong Customer (wrong_customer_003)</option>
-        </select>
+        <div class="card-header">
+          <span class="card-title">📖 Architecture</span>
+          <span class="pill">Core Logic</span>
+        </div>
 
-        <label for="agentSelect">Agent Under Test</label>
-        <select id="agentSelect">
-          <option value="good_scripted">Good Agent (Compliant & verified)</option>
-          <option value="broken_scripted">Broken Agent (Claims success, 0 tools)</option>
-          <option value="plain_gemini">Plain Gemini Flash (Live AI - Zero Framework)</option>
-          <option value="langgraph_gemini">LangGraph + Gemini Flash (State Machine Agent)</option>
-        </select>
+        <div class="info-section">
+          <h3>The Problem with LLM Judges</h3>
+          <p>
+            Standard benchmarks rely on self-reported agent responses or an "LLM-as-a-judge". Agents easily hallucinate claims like <em>"I refunded ₹2499.00"</em> even when <strong>zero backend APIs were ever invoked</strong>.
+          </p>
+        </div>
 
-        <button id="runBtn" onclick="runEvaluation()">Run Evaluation</button>
+        <div class="info-section">
+          <h3>The 3 Deterministic Pillars</h3>
+          
+          <div class="pillar-box">
+            <div class="pillar-title">1. ToolGateway (The Camera)</div>
+            <div class="pillar-desc">
+              Intercepts every single tool call in real-time. Logs sequential parameters, timestamps, and return values into an immutable trace.
+            </div>
+          </div>
 
-        <div class="divider"></div>
+          <div class="pillar-box">
+            <div class="pillar-title">2. SupportEnvironment (State)</div>
+            <div class="pillar-desc">
+              Mock database state machine enforcing business rules and strict multi-tenant customer isolation boundaries.
+            </div>
+          </div>
 
-        <h2 class="card-title" style="font-size: 0.95rem;">Lookup Previous Attempt</h2>
-        <label for="attemptIdInput">Attempt ID</label>
-        <div style="display: flex; gap: 0.5rem;">
-          <input type="number" id="attemptIdInput" placeholder="e.g. 5" style="margin-bottom: 0;">
-          <button style="width: auto; padding: 0.65rem 1rem;" onclick="lookupAttempt()">Fetch</button>
+          <div class="pillar-box">
+            <div class="pillar-title">3. OutcomeEvaluator (Referee)</div>
+            <div class="pillar-desc">
+              Never trusts agent words. Directly checks real state mutations AND validates required execution protocol rules.
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Fair Comparison Guarantees</h3>
+          <p>
+            Both Plain Gemini and LangGraph share identical tool schemas, same model checkpoint, same 0.0 temperature, and identical 8-step limits.
+          </p>
         </div>
       </div>
 
-      <!-- Right: Results Panel -->
-      <div class="card" id="resultsCard">
-        <div class="placeholder" id="placeholder">
-          Select an agent and click <strong>Run Evaluation</strong> to see the trace and outcome.
+      <!-- CENTER COLUMN: Interactive Live Runner -->
+      <div>
+        <!-- Control Card -->
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div class="card-header">
+            <span class="card-title">⚡ Interactive Test Runner</span>
+            <span class="pill" id="runnerStatusPill">Ready</span>
+          </div>
+
+          <label for="taskSelect">Evaluation Task Scenario</label>
+          <select id="taskSelect">
+            <option value="refund_eligible_001">Support Refund - Eligible (refund_eligible_001)</option>
+            <option value="refund_denied_002">Support Refund - Inspection Denied (refund_denied_002)</option>
+            <option value="wrong_customer_003">Security Boundary - Wrong Customer (wrong_customer_003)</option>
+          </select>
+
+          <label for="agentSelect">Agent Architecture Under Test</label>
+          <select id="agentSelect">
+            <option value="plain_gemini">Plain Gemini Flash Lite (Zero-Framework Loop)</option>
+            <option value="langgraph_gemini">LangGraph + Gemini Flash Lite (StateGraph)</option>
+            <option value="good_scripted">Good Agent (Positive Control: Compliant)</option>
+            <option value="broken_scripted">Broken Agent (Negative Control: Cheater / 0 Tools)</option>
+          </select>
+
+          <button id="runBtn" class="btn-primary" onclick="runEvaluation()">
+            <span>▶</span> Run Live Evaluation
+          </button>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem; align-items: center; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+            <label for="attemptIdInput" style="margin: 0; white-space: nowrap;">Database Lookup:</label>
+            <input type="number" id="attemptIdInput" placeholder="Attempt ID (e.g. 1)" style="margin: 0; max-width: 140px; padding: 0.45rem 0.65rem;">
+            <button class="btn-primary" style="width: auto; padding: 0.45rem 0.85rem;" onclick="lookupAttempt()">Fetch</button>
+          </div>
         </div>
 
-        <div id="resultsContent" style="display: none;">
-          <div class="result-banner">
-            <div>
-              <span id="passBadge" class="badge"></span>
-              <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;" id="attemptIdText"></span>
-            </div>
-            <span style="font-size: 0.8rem; color: var(--text-muted);" id="taskIdText"></span>
+        <!-- Results Card -->
+        <div class="card" id="resultsCard">
+          <div class="card-header">
+            <span class="card-title">📊 Evaluator Verdict & Execution Trace</span>
+            <span id="attemptIdBadge" class="pill" style="display: none;"></span>
           </div>
 
-          <div class="stat-box">
-            <div class="stat-label">Agent Response (What the agent claimed)</div>
-            <div class="stat-value" id="agentResponse"></div>
+          <div class="placeholder" id="placeholder">
+            Select a scenario and click <strong>Run Live Evaluation</strong> to trigger the test harness and observe live tool inspection.
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-            <div class="stat-box">
-              <div class="stat-label">Refund Verified</div>
-              <div class="stat-value" id="refundStatus"></div>
+          <div id="resultsContent" style="display: none;">
+            <div id="verdictBanner" class="result-banner">
+              <div>
+                <div class="verdict-title" id="verdictText">PASSED</div>
+                <div style="font-size: 0.75rem; opacity: 0.85;" id="verdictDetail">State mutations and protocol invariants verified.</div>
+              </div>
+              <span id="taskNameText" style="font-family: var(--font-mono); font-size: 0.8rem;"></span>
             </div>
-            <div class="stat-box">
-              <div class="stat-label">Ticket Status</div>
-              <div class="stat-value" id="ticketStatus"></div>
-            </div>
-          </div>
 
-          <div style="margin-top: 1rem;">
-            <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: #fff;">Tool Trace (Security Camera)</h3>
-            <div id="traceContainer"></div>
+            <div class="stat-box" style="margin-bottom: 0.75rem;">
+              <div class="stat-label">Agent Output Message (What the Agent Claimed)</div>
+              <div class="stat-value" id="agentResponse" style="font-size: 0.875rem; line-height: 1.5; font-weight: normal; margin-top: 0.35rem;"></div>
+            </div>
+
+            <div class="data-grid-2">
+              <div class="stat-box">
+                <div class="stat-label">Ground-Truth Refund Amount</div>
+                <div class="stat-value" id="refundStatus"></div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">Ground-Truth Ticket Status</div>
+                <div class="stat-value" id="ticketStatus"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span class="stat-label">Security Camera Trace (<span id="toolCountBadge">0</span> Events)</span>
+                <span style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">Ordered Execution Ledger</span>
+              </div>
+              <div id="traceContainer"></div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- RIGHT COLUMN: Recruiter Guide & Live Demos -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🎯 Recruiter Guide</span>
+          <span class="pill">Quickstart</span>
+        </div>
+
+        <div class="info-section">
+          <h3>Try These 3 Live Scenarios</h3>
+          <p style="margin-bottom: 0.75rem;">Click any scenario below to auto-select and run live:</p>
+
+          <!-- Demo 1 Button -->
+          <div class="demo-btn" onclick="selectDemo('refund_eligible_001', 'broken_scripted')">
+            <span class="demo-badge demo-badge-danger">1. Liar Detection</span>
+            <div class="demo-name">Broken Agent Claims Refund</div>
+            <div class="demo-desc">
+              Agent says <em>"Your refund is issued!"</em> but makes <strong>0 tool calls</strong>. Camera catches the lie and <strong>FAILS</strong> the run.
+            </div>
+          </div>
+
+          <!-- Demo 2 Button -->
+          <div class="demo-btn" onclick="selectDemo('refund_eligible_001', 'langgraph_gemini')">
+            <span class="demo-badge demo-badge-success">2. Happy Path Protocol</span>
+            <div class="demo-name">LangGraph Gemini State Machine</div>
+            <div class="demo-desc">
+              Inspects return & order, calculates remaining balance, issues refund, and resolves ticket (4 sequential verified steps).
+            </div>
+          </div>
+
+          <!-- Demo 3 Button -->
+          <div class="demo-btn" onclick="selectDemo('wrong_customer_003', 'plain_gemini')">
+            <span class="demo-badge demo-badge-warning">3. Cross-Tenant Security</span>
+            <div class="demo-name">Unauthorized Access Blocked</div>
+            <div class="demo-desc">
+              Customer 99 requests refund on Customer 12's order. Environment rejects order lookup; agent safely aborts without data leaks.
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section" style="border-top: 1px solid var(--border); padding-top: 1rem;">
+          <h3>Engineering Highlights</h3>
+          <div style="font-size: 0.775rem; color: var(--text-muted); line-height: 1.6;">
+            <div>✓ <strong>Single Source of Truth:</strong> One schema for Plain & LangGraph.</div>
+            <div>✓ <strong>Trace Verification:</strong> Protocol invariant checking.</div>
+            <div>✓ <strong>Crash Resilience:</strong> Exponential backoff retries on 503s.</div>
+            <div>✓ <strong>Automated CI:</strong> GitHub Actions + Postgres 17 (15 tests passing).</div>
+          </div>
+        </div>
+      </div>
+
     </div>
+
+    <!-- Bottom Footer -->
+    <div class="footer-bar">
+      <span>AgentReliability — Local Prototype for Honest AI Benchmarking</span>
+      <span>Built with Python 3.14 · FastAPI · LangGraph · PostgreSQL 17 · Alembic</span>
+    </div>
+
   </div>
 
   <script>
+    function selectDemo(taskId, agentId) {
+      document.getElementById('taskSelect').value = taskId;
+      document.getElementById('agentSelect').value = agentId;
+      runEvaluation();
+    }
+
     async function runEvaluation() {
       const runBtn = document.getElementById('runBtn');
+      const statusPill = document.getElementById('runnerStatusPill');
       const taskId = document.getElementById('taskSelect').value;
       const agentId = document.getElementById('agentSelect').value;
 
       runBtn.disabled = true;
-      runBtn.innerText = 'Evaluating...';
+      runBtn.innerHTML = "<span>⏳</span> Executing Agent...";
+      statusPill.textContent = "Running...";
+      statusPill.className = "pill active";
 
       try {
-        const res = await fetch('/evaluations', {
+        const response = await fetch('/evaluations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ task_id: taskId, agent_id: agentId })
         });
-        const data = await res.json();
-        if (!res.ok) {
-          alert('Evaluation failed: ' + (data.detail || 'Server error'));
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({ detail: 'Unknown error occurred' }));
+          alert(`Evaluation failed (${response.status}): ${err.detail}`);
           return;
         }
-        renderResult(data);
+
+        const data = await response.json();
+        renderAttempt(data);
       } catch (err) {
-        alert('Evaluation failed: ' + err.message);
+        alert('Network error connecting to evaluation runner: ' + err.message);
       } finally {
         runBtn.disabled = false;
-        runBtn.innerText = 'Run Evaluation';
+        runBtn.innerHTML = "<span>▶</span> Run Live Evaluation";
+        statusPill.textContent = "Ready";
+        statusPill.className = "pill";
       }
     }
 
     async function lookupAttempt() {
-      const id = document.getElementById('attemptIdInput').value;
-      if (!id) return alert('Please enter an Attempt ID');
+      const attemptId = document.getElementById('attemptIdInput').value.trim();
+      if (!attemptId) return;
 
       try {
-        const res = await fetch(`/evaluations/${id}`);
-        if (!res.ok) {
-          const err = await res.json();
-          alert(err.detail || 'Attempt not found');
+        const response = await fetch(`/evaluations/${attemptId}`);
+        if (!response.ok) {
+          alert('Attempt #' + attemptId + ' not found in database.');
           return;
         }
-        const data = await res.json();
-        renderResult(data);
+        const data = await response.json();
+        renderAttempt(data);
       } catch (err) {
-        alert('Lookup failed: ' + err.message);
+        alert('Failed to lookup attempt: ' + err.message);
       }
     }
 
-    function renderResult(data) {
+    function renderAttempt(data) {
       document.getElementById('placeholder').style.display = 'none';
       document.getElementById('resultsContent').style.display = 'block';
 
-      const passed = data.evaluation_result.passed;
-      const badge = document.getElementById('passBadge');
-      badge.className = 'badge ' + (passed ? 'badge-pass' : 'badge-fail');
-      badge.innerText = passed ? 'PASSED' : 'FAILED';
+      const banner = document.getElementById('verdictBanner');
+      const verdictText = document.getElementById('verdictText');
+      const verdictDetail = document.getElementById('verdictDetail');
+      const taskNameText = document.getElementById('taskNameText');
+      const attemptBadge = document.getElementById('attemptIdBadge');
 
-      document.getElementById('attemptIdText').innerText = `Attempt #${data.attempt_id}`;
-      document.getElementById('taskIdText').innerText = data.task_id;
-      document.getElementById('agentResponse').innerText = `"${data.agent_response}"`;
+      const evalRes = data.evaluation_result || {};
+      const isPassed = data.status === 'passed' || evalRes.passed === true;
+      const isError = data.status === 'error';
 
-      // Format refund amounts (minor units to major currency)
-      const expectedAmt = (data.evaluation_result.expected_amount_minor / 100).toFixed(2);
-      const actualAmt = (data.evaluation_result.actual_amount_minor / 100).toFixed(2);
-      document.getElementById('refundStatus').innerText = `${actualAmt} / ${expectedAmt} INR`;
+      if (isError) {
+        banner.className = 'result-banner banner-error';
+        verdictText.textContent = 'EXECUTION ERROR';
+        verdictDetail.textContent = data.error_message || 'Agent or API crashed unexpectedly.';
+      } else if (isPassed) {
+        banner.className = 'result-banner banner-pass';
+        verdictText.textContent = 'VERIFIED PASS';
+        verdictDetail.textContent = 'Ground-truth state mutations & tool trace rules strictly validated.';
+      } else {
+        banner.className = 'result-banner banner-fail';
+        verdictText.textContent = 'FAILED';
+        verdictDetail.textContent = 'Agent failed state expectations or missed required verification tools.';
+      }
 
-      document.getElementById('ticketStatus').innerText = 
-        `${data.evaluation_result.actual_ticket_status} (expected: ${data.evaluation_result.expected_ticket_status})`;
+      taskNameText.textContent = data.task_id;
+      attemptBadge.style.display = 'inline-block';
+      attemptBadge.textContent = 'Attempt #' + (data.attempt_id || 'N/A');
 
-      // Render tool trace
+      // Response
+      document.getElementById('agentResponse').textContent = data.agent_response || '(No response text produced)';
+
+      // Stats
+      const expectedAmount = (evalRes.expected_amount_minor || 0) / 100;
+      const actualAmount = (evalRes.actual_amount_minor || 0) / 100;
+      document.getElementById('refundStatus').textContent = `₹${actualAmount.toFixed(2)} / ₹${expectedAmount.toFixed(2)}`;
+
+      const expectedTicket = evalRes.expected_ticket_status || 'N/A';
+      const actualTicket = evalRes.actual_ticket_status || 'N/A';
+      document.getElementById('ticketStatus').textContent = `${actualTicket} (expected: ${expectedTicket})`;
+
+      // Trace
+      const traceEvents = data.trace_events || [];
+      document.getElementById('toolCountBadge').textContent = traceEvents.length;
       const traceContainer = document.getElementById('traceContainer');
-      traceContainer.innerHTML = '';
 
-      if (!data.trace_events || data.trace_events.length === 0) {
+      if (traceEvents.length === 0) {
         traceContainer.innerHTML = `
           <div class="empty-trace">
-            <strong>⚠️ Zero Tool Calls Recorded!</strong><br>
-            The agent made a claim of success, but called 0 tools in the environment. The outcome evaluator caught the false claim.
+            <strong>⚠️ No Tool Invocations Detected!</strong><br>
+            The agent produced conversational claims without calling any system tools.
           </div>
         `;
-      } else {
-        const ul = document.createElement('ul');
-        ul.className = 'timeline';
-        data.trace_events.forEach(evt => {
-          const li = document.createElement('li');
-          li.className = 'timeline-item';
-          li.innerHTML = `
-            <div class="tool-box">
-              <div class="tool-name">#${evt.sequence} ${evt.tool_name}()</div>
-              <div class="tool-args">Args: ${JSON.stringify(evt.arguments)}</div>
-              <div class="tool-args" style="color: #6ee7b7; margin-top: 0.2rem;">Result: ${JSON.stringify(evt.result)}</div>
-            </div>
-          `;
-          ul.appendChild(li);
-        });
-        traceContainer.appendChild(ul);
+        return;
       }
+
+      let html = '<ul class="timeline">';
+      traceEvents.forEach((ev, idx) => {
+        const argsStr = JSON.stringify(ev.arguments || {});
+        const resStr = JSON.stringify(ev.result !== undefined ? ev.result : null);
+        html += `
+          <li class="timeline-item">
+            <div class="tool-box">
+              <div class="tool-header">
+                <span class="tool-name">#${idx + 1} ${ev.tool_name}()</span>
+                <span class="tool-seq">seq: ${ev.sequence || idx + 1}</span>
+              </div>
+              <div class="tool-args"><strong>Args:</strong> ${argsStr}</div>
+              <div class="tool-res"><strong>Result:</strong> ${resStr}</div>
+            </div>
+          </li>
+        `;
+      });
+      html += '</ul>';
+      traceContainer.innerHTML = html;
     }
   </script>
 </body>
