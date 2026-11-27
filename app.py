@@ -23,35 +23,27 @@ from agent_reliability.api import app as fastapi_app, INDEX_PATH
 # Ensure database tables exist automatically
 Base.metadata.create_all(bind=engine)
 
-# Embed our custom 3-panel command dashboard inside Gradio
-custom_css = """
-footer {visibility: hidden}
-.gradio-container {padding: 0 !important; margin: 0 !important; max-width: 100% !important;}
-iframe {width: 100vw; height: 100vh; border: none; display: block;}
-"""
+demo = gr.Blocks(title="AgentReliability")
 
-with gr.Blocks(title="AgentReliability", css=custom_css, fill_width=True) as demo:
-    gr.HTML('<iframe src="/dashboard"></iframe>')
+# Remove Gradio's internal root template handler which causes a blank page without components
+demo.app.router.routes = [
+    r for r in demo.app.router.routes if getattr(r, "path", "") != "/"
+]
 
-# Attach all FastAPI endpoints (/evaluations, /health, etc.) to Gradio's internal app
-demo.app.routes.extend(
-    [
-        r
-        for r in fastapi_app.routes
-        if getattr(r, "path", "")
-        not in [getattr(dr, "path", "") for dr in demo.app.routes]
-    ]
-)
-
-
-@demo.app.get("/dashboard", response_class=HTMLResponse)
+# Serve our 3-panel command dashboard directly on the root URL '/'
+@demo.app.get("/", response_class=HTMLResponse)
 def serve_dashboard():
     return INDEX_PATH.read_text(encoding="utf-8")
 
 
+# Attach all FastAPI endpoints (/evaluations, /health, etc.)
+for route in fastapi_app.routes:
+    if getattr(route, "path", "") not in [getattr(dr, "path", "") for dr in demo.app.routes]:
+        demo.app.routes.append(route)
+
 app = demo.app
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, css=custom_css)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
 
 
