@@ -1,3 +1,4 @@
+import html
 import os
 import sys
 from pathlib import Path
@@ -16,26 +17,26 @@ except Exception:
     pass
 
 import gradio as gr
-from fastapi.responses import HTMLResponse
 from agent_reliability.database import Base, engine
 from agent_reliability.api import app as fastapi_app, INDEX_PATH
 
 # Ensure database tables exist automatically
 Base.metadata.create_all(bind=engine)
 
-with gr.Blocks(title="AgentReliability") as demo:
-    pass
+# Prepare 3-panel command dashboard
+raw_html = INDEX_PATH.read_text(encoding="utf-8")
+escaped_html = html.escape(raw_html)
 
-# Remove Gradio's internal root template handler which causes a blank page without components
-demo.app.router.routes = [
-    r for r in demo.app.router.routes if getattr(r, "path", "") != "/"
-]
+custom_css = """
+footer { display: none !important; }
+.gradio-container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+iframe { width: 100%; height: 98vh; border: none; display: block; }
+"""
 
-# Serve our 3-panel command dashboard directly on the root URL '/'
-@demo.app.get("/", response_class=HTMLResponse)
-def serve_dashboard():
-    return INDEX_PATH.read_text(encoding="utf-8")
-
+with gr.Blocks(title="AgentReliability", fill_width=True) as demo:
+    gr.HTML(
+        f'<iframe srcdoc="{escaped_html}" style="width: 100%; height: 98vh; border: none;"></iframe>'
+    )
 
 # Attach all FastAPI endpoints (/evaluations, /health, etc.)
 for route in fastapi_app.routes:
@@ -45,6 +46,6 @@ for route in fastapi_app.routes:
 app = demo.app
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=7860, css=custom_css)
 
 
