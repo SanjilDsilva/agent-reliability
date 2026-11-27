@@ -23,7 +23,8 @@ from agent_reliability.api import app as fastapi_app, INDEX_PATH
 # Ensure database tables exist automatically
 Base.metadata.create_all(bind=engine)
 
-demo = gr.Blocks(title="AgentReliability")
+with gr.Blocks(title="AgentReliability") as demo:
+    pass
 
 # Remove Gradio's internal root template handler which causes a blank page without components
 demo.app.router.routes = [
