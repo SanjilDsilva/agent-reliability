@@ -28,5 +28,14 @@ else:
     # Zero-config embedded database for standalone cloud platforms like Hugging Face Spaces
     database_url = "sqlite:///./agent_reliability.db"
 
-engine = create_engine(database_url)
+def init_db():
+    from . import models  # noqa: F401
+    Base.metadata.create_all(bind=engine)
+
+
+if str(database_url).startswith("sqlite"):
+    engine = create_engine(database_url, connect_args={"check_same_thread": False})
+    init_db()
+else:
+    engine = create_engine(database_url)
 SessionFactory = sessionmaker(bind=engine)
